@@ -9,13 +9,14 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up()
+    public function up(): void
     {
-        Schema::create('posts', function (Blueprint $table) {
+        Schema::create('chats', function (Blueprint $table) {
             $table->id();
-            $table->integer('user_id');
-            $table->string('content');
-            $table->string('description');
+            $table->integer('sender-id');
+            $table->integer('receiver_id');
+            $table->string('message');
+            $table->boolean('viewed');
             $table->timestamps();
         });
     }
@@ -23,8 +24,8 @@ return new class extends Migration
     /**
      * Reverse the migrations.
      */
-    public function down()
+    public function down(): void
     {
-        Schema::dropIfExists('posts');
+        Schema::dropIfExists('chats');
     }
 };

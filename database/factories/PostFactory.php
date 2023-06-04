@@ -2,23 +2,20 @@
 
 namespace Database\Factories;
 
+use App\Models\Member;
+use App\Models\Post;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Posts>
- */
-class PostsFactory extends Factory
+class PostFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
+    protected $model = Post::class;
+    
     public function definition()
     {
+        $user = Member::where('id')->get();
         return [
-            'user_id' => User::all()->id,
+            'user_id' => $user,
             'content' => $this->faker->text(),
             'description' =>  $this->faker->sentence(),
         ];

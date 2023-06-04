@@ -3,17 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreDonateRequest;
+use App\Models\Donate;
 use App\Models\Member;
-use App\Models\Post;
-use App\Models\Posts;
-use App\Models\User;
 use App\Traits\HttpResponses;
 use Illuminate\Http\Request;
-use Database\Factories\PostsFactory;
-use Illuminate\Support\Facades\Auth;
-use Symfony\Component\Routing\Loader\Configurator\Traits\HostTrait;
 
-class PostsController extends Controller
+class DonateController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -21,11 +17,8 @@ class PostsController extends Controller
     use HttpResponses;
     public function index()
     {
-        
-        $posts = Post::all();
-        return $posts;
-
-
+        $don = Donate::all();
+        return $don;
     }
 
     /**
@@ -39,32 +32,36 @@ class PostsController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request, $mem_id)
+    public function store(StoreDonateRequest $request, $mem_id)
     {
         $this->validate($request, array(
+            'donation_type' => 'required',
+            'title'=> 'required',
             'description' => 'required',
-            'content' => 'required',
+            'amount' => 'required',
+            'status' => 'required'
           ));
           // decode token to  get id
           // or get id from front end
 
+        $don= new Donate();
+        $mem= Member::find($mem_id);
+        if (!$mem){
+        return response()->json(['error' => 'Member not found'], 404);
+        }else{
         
-        
-          $post = new Post();
-          $mem= Member::find($mem_id);
-          if (!$mem){
-            return response()->json(['error' => 'Member not found'], 404);
-          }else{
-        
-          $post->user_id = $mem_id;
-          $post->content = $request->content;
-          $post->description = $request->description;
-          $post->save();
+        $don->donor_id = $mem_id;
+        $don->donation_type = $request->donation_type;
+        $don->title = $request->title;
+        $don->description = $request->description;
+        $don->amount = $request->amount;
+        $don->status = $request->status;
+        $don->save();
 
-          return $this->success([
-            'data' => $post,
-            'message'=>'posts created'
-        ]);
+        return $this->success([
+        'data' => $don,
+        'message'=>'donation created'
+        ]);  
     }
     }
 
@@ -77,10 +74,8 @@ class PostsController extends Controller
         if (!$mem){
         return response()->json(['error' => 'Member not found'], 404);
         }else{
-            return Post::find($id);
+            return Donate::find($id);
         }
-        
-        
     }
 
     /**
@@ -100,9 +95,9 @@ class PostsController extends Controller
         if (!$mem){
         return response()->json(['error' => 'Member not found'], 404);
         }else{
-        $post=Post::find($id);
-        $post->update($request->all());
-        return $post;
+        $don=Donate::find($id);
+        $don->update($request->all());
+        return $don;
         }
     }
 
@@ -114,7 +109,6 @@ class PostsController extends Controller
         $mem= Member::find($mem_id);
         if (!$mem){
         return response()->json(['error' => 'Member not found'], 404);
-        } else{return Post::destroy($id);}
+        } else{return Donate::destroy($id);}
     }
-
 }

@@ -2,6 +2,16 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PostsController;
+use App\Http\Controllers\CommentController;
+use App\Http\Controllers\MemberController;
+use App\Http\Controllers\LikeController;
+use App\Http\Controllers\OpportunityController;
+use App\Http\Controllers\DonateController;
+use App\Http\Controllers\ArchiveController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\EmailVerificationController;
+use App\Http\Controllers\EmailController;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -16,7 +26,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+Route::middleware('auth:sanctum', 'verified')->get('/user', function (Request $request) {
     return $request->user();
 });
 
@@ -26,8 +36,43 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
 
+Route::get('/members', [MemberController::class, 'index']);
+Route::get('/members/{mem_id}/posts/{id}', [PostsController::class, 'show']);
+Route::get('/members/search/{name}', [MemberController::class, 'search']);
+
+Route::resource('/members', MemberController::class);
+Route::resource('/members/{mem_id}/posts', PostsController::class);
+Route::resource('/members/{mem_id}/posts/{post_id}/Comments', CommentController::class);
+Route::post('/posts/{post}/comments', [CommentController::class, 'store'])->name('comments.store');
+Route::resource('/members/{mem_id}/posts/{post_id}/likes', LikeController::class);
+Route::resource('/members/{mem_id}/opps', OpportunityController::class);
+Route::resource('/members/{mem_id}/donate', DonateController::class);
+Route::resource('/archive', ArchiveController::class);
+Route::get('/notifs', [NotificationController::class, 'index']);
+Route::post('/comments/{$com_id}/notifs', [NotificationController::class, 'storePostNotification']);
+//Route::post('/members/{mem_id}/posts/{post_id}/Comments/{$com_id}/notifications',[NotificationController::class, 'storePostNotification']);
+// Route::post('/sendemail', [EmailController::class, 'sendEmail']);
+
+// Route::post('email/verification-notification', [EmailVerificationController::class, 'sendVerificationEmail'])->middleware('auth:sanctum');
+// Route::get('verify-email/{id}/{hash}', [EmailVerificationController::class, 'verify'])->name('verification.verify')->middleware('auth:sanctum');
+// Email verification routes
+Route::get('/email/verify', 'App\Http\Controllers\Auth\VerificationController@show')
+    ->name('verification.notice')
+    ->middleware('auth:sanctum');
+
+// Route::get('/email/verify/{id}/{hash}', 'App\Http\Controllers\Auth\VerificationController@verify')
+//     ->name('verification.verify')
+//     ->middleware('auth:sanctum');
+Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+  $request->fulfill();
+})->middleware(['auth:sanctum'])->name('verification.verify');
+
+Route::post('/email/resend', 'App\Http\Controllers\Auth\VerificationController@resend')
+    ->name('verification.resend')
+    ->middleware('auth:sanctum');
+
 //protected routes
 Route::group(['middleware' => ['auth:sanctum']], function () {
-    Route::post('/logout', [AuthController::class, 'logout']);
-    Route::resource('/posts', PostsController::class);
+  Route::post('/logout', [AuthController::class, 'logout']);  
+
 });

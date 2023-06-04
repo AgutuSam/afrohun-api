@@ -9,13 +9,16 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up()
+    public function up(): void
     {
-        Schema::create('posts', function (Blueprint $table) {
+        Schema::create('settings', function (Blueprint $table) {
             $table->id();
             $table->integer('user_id');
-            $table->string('content');
-            $table->string('description');
+            $table->boolean('notif_enabled');
+            $table->boolean('email_notif_enabled');
+            $table->boolean('chat_enabled');
+            $table->boolean('setting5');
+            $table->boolean('setting6');
             $table->timestamps();
         });
     }
@@ -23,8 +26,8 @@ return new class extends Migration
     /**
      * Reverse the migrations.
      */
-    public function down()
+    public function down(): void
     {
-        Schema::dropIfExists('posts');
+        Schema::dropIfExists('settings');
     }
 };

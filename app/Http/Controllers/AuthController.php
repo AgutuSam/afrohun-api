@@ -9,8 +9,11 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginUserRequest;
 use App\Http\Requests\StoreUserRequest;
+use App\Models\Member;
 use App\Traits\HttpResponses;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
+
 
 class AuthController extends Controller
 {
@@ -32,18 +35,23 @@ class AuthController extends Controller
     public function register(StoreUserRequest $request){
         $request->validated($request->all());
         
-        $user = User::create([
+        $user = user::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
-
+        event(new Registered($user));
         return $this->success([
             'user' => $user,
             'token' => $user->createToken('API Token of' .$user->name)->plainTextToken
         ]);
     }
-    public function logout(){
-        return response()->json('toka');
+    public function logout(Request $request){
+        $request= auth()->user()->tokens()->delete();
+           If ($request){ return $this->success([
+                'message'=>'Logged out'
+            ]);}
+        // Member::logout();
+        // return response()->json(['message' => 'Logged out successfully']);
     }
 }

@@ -9,13 +9,16 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up()
+    public function up(): void
     {
-        Schema::create('posts', function (Blueprint $table) {
+        Schema::create('opportunities', function (Blueprint $table) {
             $table->id();
-            $table->integer('user_id');
-            $table->string('content');
+            $table->string('title');
+            $table->boolean('verified');
             $table->string('description');
+            $table->string('type');
+            $table->date('start_date');
+            $table->date('end_date');
             $table->timestamps();
         });
     }
@@ -23,8 +26,8 @@ return new class extends Migration
     /**
      * Reverse the migrations.
      */
-    public function down()
+    public function down(): void
     {
-        Schema::dropIfExists('posts');
+        Schema::dropIfExists('opportunities');
     }
 };
