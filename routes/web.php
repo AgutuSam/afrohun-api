@@ -2,7 +2,9 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\EmailController;
+use App\Http\Controllers\ChatController;
 use Illuminate\Support\Facades\Auth;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -23,3 +25,9 @@ Route::get('/sendemail', [EmailController::class, 'sendEmail']);
 Auth::routes([
     'verify'=>true
 ]);
+
+
+// Route::get('chat', 'ChatController@index');
+// Route::get('messages', 'ChatController@fetchMessages');
+// Route::post('messages', 'ChatController@sendMessage');
+

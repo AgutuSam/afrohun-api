@@ -9,9 +9,12 @@ use App\Http\Controllers\OpportunityController;
 use App\Http\Controllers\DonateController;
 use App\Http\Controllers\ArchiveController;
 use App\Http\Controllers\NotificationController;
-use App\Http\Controllers\EmailVerificationController;
-use App\Http\Controllers\EmailController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\Auth\ResetPasswordController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use App\Http\Controllers\ChatController;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -47,6 +50,7 @@ Route::post('/posts/{post}/comments', [CommentController::class, 'store'])->name
 Route::resource('/members/{mem_id}/posts/{post_id}/likes', LikeController::class);
 Route::resource('/members/{mem_id}/opps', OpportunityController::class);
 Route::resource('/members/{mem_id}/donate', DonateController::class);
+Route::resource('/users', UserController::class)->middleware(['auth:sanctum']);
 Route::resource('/archive', ArchiveController::class);
 Route::get('/notifs', [NotificationController::class, 'index']);
 Route::post('/comments/{$com_id}/notifs', [NotificationController::class, 'storePostNotification']);
@@ -71,8 +75,19 @@ Route::post('/email/resend', 'App\Http\Controllers\Auth\VerificationController@r
     ->name('verification.resend')
     ->middleware('auth:sanctum');
 
+Route::get('/forgot-password', [ForgotPasswordController::class, 'forgotPassword']
+      // return view('auth.forgot-password');
+  )->middleware('auth:sanctum')->name('password.request');
+
+Route::get('/reset-password/{token}', [ResetPasswordController::class, 'resetPassword']
+    // return view('auth.reset-password', ['token' => $token]);
+)->middleware('auth:sanctum')->name('password.reset');
+
 //protected routes
 Route::group(['middleware' => ['auth:sanctum']], function () {
   Route::post('/logout', [AuthController::class, 'logout']);  
 
 });
+
+//Route::post('messages', [ChatController::class, 'sendPrivateMessage'])->middleware('auth:sanctum');
+Route::resource('/messages', ChatController::class)->middleware('auth:sanctum');

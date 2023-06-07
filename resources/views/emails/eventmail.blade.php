@@ -7,6 +7,6 @@
     <title>Event Mail</title>
 </head>
 <body>
-    <h1>{{$maildata['title']}}</h1>
+    <h1>{{$maildata}}</h1>
 </body>
 </html>
