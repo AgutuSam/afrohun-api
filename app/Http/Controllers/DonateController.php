@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreDonateRequest;
 use App\Models\Donate;
 use App\Models\Member;
+use App\Models\User;
 use App\Traits\HttpResponses;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class DonateController extends Controller
 {
@@ -32,7 +34,7 @@ class DonateController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreDonateRequest $request, $mem_id)
+    public function store(StoreDonateRequest $request)
     {
         $this->validate($request, array(
             'donation_type' => 'required',
@@ -45,12 +47,13 @@ class DonateController extends Controller
           // or get id from front end
 
         $don= new Donate();
-        $mem= Member::find($mem_id);
-        if (!$mem){
-        return response()->json(['error' => 'Member not found'], 404);
+        $mem= User::find(Auth::id());
+        if (!Auth::check()) {
+            return response()->json(['message' => 'Unauthenticated.'], 401);
+        
         }else{
         
-        $don->donor_id = $mem_id;
+        $don->donor_id = $mem->id;
         $don->donation_type = $request->donation_type;
         $don->title = $request->title;
         $don->description = $request->description;
@@ -68,11 +71,12 @@ class DonateController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $mem_id, $id)
+    public function show(string $id)
     {
-        $mem= Member::find($mem_id);
-        if (!$mem){
-        return response()->json(['error' => 'Member not found'], 404);
+        
+        if (!Auth::check()) {
+            return response()->json(['message' => 'Unauthenticated.'], 401);
+        
         }else{
             return Donate::find($id);
         }
@@ -89,11 +93,11 @@ class DonateController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $mem_id, $id)
+    public function update(Request $request, string $id)
     {
-        $mem= Member::find($mem_id);
-        if (!$mem){
-        return response()->json(['error' => 'Member not found'], 404);
+        
+        if (!Auth::check()) {
+            return response()->json(['message' => 'Unauthenticated.'], 401);
         }else{
         $don=Donate::find($id);
         $don->update($request->all());
@@ -104,11 +108,10 @@ class DonateController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $mem_id, $id)
+    public function destroy(string $id)
     {
-        $mem= Member::find($mem_id);
-        if (!$mem){
-        return response()->json(['error' => 'Member not found'], 404);
+        if (!Auth::check()) {
+            return response()->json(['message' => 'Unauthenticated.'], 401);
         } else{return Donate::destroy($id);}
     }
 }

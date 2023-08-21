@@ -25,13 +25,12 @@ class StoreMemberRequest extends FormRequest
     public function rules(): array
     {
         return [
-        'firstname'=>['required'],
-        'lastname'=>['required'],
-        'type'=>[Rule::in(['I', 'B', 'i', 'b'])],
+        'firstname'=>['nullable'],
+        'lastname'=>['nullable'],
+        'type'=>[Rule::in(['Student', 'Alumni', 'Expert', 'Organisation'])],
         'profile_picture'=>['nullable'],
-        'password'=>['required'],
-        'email'=>['required','email', 'unique:members'],
         'registration_date'=> now(),
+        'role'=>[Rule::in(['SuperAdmin', 'Admin', 'User'])],
         ];
     }
 }

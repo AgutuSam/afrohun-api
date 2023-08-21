@@ -37,24 +37,24 @@ class CommentController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request, $mem_id, $post_id)
+    public function store(Request $request, $post_id)
     {
         $validatedData = $request->validate([
             'content' => 'required',
         ]);
 
         $post=Post::find($post_id);
-        $mem=Member::find($mem_id);
+        $mem=User::find(Auth::id());
 
-        if(!$mem || !$post){
-            return response()->json(['error' => 'Member not found'], 404);
+        if(!$post){
+            return response()->json(['error' => 'Post not found'], 404);
         }else{
 
         $comment = new Comment;
         
         $comment->content = $request->content;
         $comment->post_id = $post_id;
-        $comment->user_id = $mem_id;
+        $comment->user_id = $mem->id;
         $comment->save();
 
         return response()->json([
@@ -67,15 +67,16 @@ class CommentController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $mem_id, $post_id, $id)
+    public function show(string $post_id, $id)
     {
         $post=Post::find($post_id);
-        $mem=Member::find($mem_id);
+        
 
-        if(!$mem || !$post){
-            return response()->json(['error' => 'Member not found'], 404);
+        if (!Auth::check()) {
+            return response()->json(['message' => 'Unauthenticated.'], 401);
         }else{
-            return Comment::find($id);
+            $comments = Comment::where('post_id', $post_id)->get();
+            return $comments;
         }
         
     }
@@ -91,13 +92,10 @@ class CommentController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $mem_id, $post_id, $id)
+    public function update(Request $request, $id)
     {
-        $post=Post::find($post_id);
-        $mem=Member::find($mem_id);
-
-        if(!$mem || !$post){
-            return response()->json(['error' => 'Member not found'], 404);
+        if (!Auth::check()) {
+            return response()->json(['message' => 'Unauthenticated.'], 401);
         }else{
         $comment=Comment::find($id);
         $comment->update($request->all());
@@ -108,13 +106,12 @@ class CommentController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $mem_id, $post_id, $id)
+    public function destroy(string $id)
     {
-        $post=Post::find($post_id);
-        $mem=Member::find($mem_id);
+       
 
-        if(!$mem || !$post){
-            return response()->json(['error' => 'Member not found'], 404);
+        if (!Auth::check()) {
+            return response()->json(['message' => 'Unauthenticated.'], 401);
         }else{
         return Comment::destroy($id);
         }

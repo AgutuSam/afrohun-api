@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('title');
             $table->boolean('verified');
             $table->string('description');
+            $table->string('organisation');
             $table->string('type');
             $table->date('start_date');
             $table->date('end_date');

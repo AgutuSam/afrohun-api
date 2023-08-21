@@ -24,6 +24,26 @@ class User extends Authenticatable implements MustVerifyEmail
         'name',
         'email',
         'password',
+        'firstname',
+        'lastname',
+        'type',
+        'profile_picture',
+        'approved',
+        'institution',
+        'career',
+        'age',
+        'location',
+        'school',
+        'faculty',
+        'grad_year',
+        'course',
+        'bio',
+        'interests',
+        'speciality',
+        'organisation',
+        'availability',
+        'title',
+        'role'
     ];
 
     /**
@@ -34,6 +54,12 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $hidden = [
         'password',
         'remember_token',
+    ];
+
+    protected $attributes = [
+        //'registration_date' => null,
+        // 'approved' => 1,
+        'type'=>'Alumni',
     ];
 
     /**
@@ -51,7 +77,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'email_verified_at' => now(),
         ])->save();
     }
-  
+
     public function messages(): HasMany
     {
     return $this->hasMany(Message::class);
@@ -62,8 +88,14 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(Post::class);
     }
+
     public function comments()
     {
         return $this->hasMany(Comment::class);
+    }
+
+    public function groups()
+    {
+        return $this->belongsToMany(Groupz::class, 'group_membership', 'user_id', 'groupz_id');
     }
 }

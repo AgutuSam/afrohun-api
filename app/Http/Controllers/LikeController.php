@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Like;
 use App\Models\Member;
 use App\Models\Post;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class LikeController extends Controller
 {
@@ -15,6 +17,7 @@ class LikeController extends Controller
      */
     public function index()
     {
+        
         $like = Like::all();
         return $like;
     }
@@ -30,14 +33,14 @@ class LikeController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request, $mem_id, $post_id)
+    public function store(Request $request, $post_id)
     {
         $validatedData = $request->validate([
             
         ]);
 
         $post=Post::find($post_id);
-        $mem=Member::find($mem_id);
+        $mem=User::find(Auth::id());
 
         if(!$mem || !$post){
             return response()->json(['error' => 'post not found'], 404);
@@ -45,16 +48,18 @@ class LikeController extends Controller
 
         $like = new Like();
         $no= Like::all()->count();
+
+        $likes = Like::where('post_id', $post_id)->count();
         $active=$no+1;
         
         $like->active = $active;
         $like->post_id = $post_id;
-        $like->user_id = $mem_id;
+        $like->user_id = $mem->id;
         $like->save();
 
         return response()->json([
             'message' => 'Like is added',
-            'data' => $like
+            'data' => $likes
         ]);
     }
     }
@@ -62,10 +67,10 @@ class LikeController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $mem_id, $post_id, $id)
+    public function show(string $post_id, $id)
     {
         $post=Post::find($post_id);
-        $mem=Member::find($mem_id);
+        $mem=User::find(Auth::id());
 
         if(!$mem || !$post){
             return response()->json(['error' => 'Member not found'], 404);
@@ -93,13 +98,10 @@ class LikeController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $mem_id, $post_id, $id)
+    public function destroy(string $id)
     {
-        $post=Post::find($post_id);
-        $mem=Member::find($mem_id);
-
-        if(!$mem || !$post){
-            return response()->json(['error' => 'Member not found'], 404);
+        if (!Auth::check()) {
+            return response()->json(['message' => 'Unauthenticated.'], 401);
         }else{
         return Like::destroy($id);
         }

@@ -39,25 +39,26 @@ class PostsController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request, $mem_id)
+    public function store(Request $request)
     {
         $this->validate($request, array(
             'description' => 'required',
             'content' => 'required',
+            'user_image' => 'required',
           ));
-          // decode token to  get id
-          // or get id from front end
-
-        
+         
+          if (!Auth::check()) {
+            return response()->json(['message' => 'Unauthenticated.'], 401);
+        }
         
           $post = new Post();
-          $mem= Member::find($mem_id);
-          if (!$mem){
-            return response()->json(['error' => 'Member not found'], 404);
-          }else{
+          $mem= User::find(Auth::id());
         
-          $post->user_id = $mem_id;
+          $post->user_id = $mem->id;
+        //   $post->user_image = $mem->profile_picture;
+        $filename=$request->file('user_image')->store('posts','public');
           $post->content = $request->content;
+          $post->user_image = $filename;
           $post->description = $request->description;
           $post->save();
 
@@ -65,22 +66,28 @@ class PostsController extends Controller
             'data' => $post,
             'message'=>'posts created'
         ]);
-    }
+    
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(string $mem_id, $id)
+    public function show($id)
     {
-        $mem= Member::find($mem_id);
-        if (!$mem){
-        return response()->json(['error' => 'Member not found'], 404);
-        }else{
-            return Post::find($id);
+        if (!Auth::check()) {
+            return response()->json(['message' => 'Unauthenticated.'], 401);
         }
+        $post= Post::find($id);
+        return $post;
         
         
+    }
+    public function showUser(){
+
+        $user = User::find(Auth::id());
+        $post= Post::where('user_id', $user->id)->get();
+        return $post;
+
     }
 
     /**
@@ -94,24 +101,35 @@ class PostsController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $mem_id, $id)
+    public function update(Request $request, $id)
     {
-        $mem= Member::find($mem_id);
-        if (!$mem){
-        return response()->json(['error' => 'Member not found'], 404);
-        }else{
+        $this->validate($request, array(
+            'description' => 'required',
+            'content' => 'required',
+          ));
+        $mem= User::find(Auth::id());
+
+        $fileName = time().'_'.$request->file->getClientOriginalName();
+            // $filePath = $request->file('profile_picture')->store('photos', $fileName, 'public');
+        $filename=$request->file('profile_picture')->store('photos',$fileName, 'public');
+
+
         $post=Post::find($id);
-        $post->update($request->all());
+        $post->user_id = $mem->id;
+        $post->user_image = $mem->profile_picture;
+        $post->content = $request->content;
+        $post->description = $request->description;
+        $post->update();
         return $post;
-        }
+        
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $mem_id, $id)
+    public function destroy(string $id)
     {
-        $mem= Member::find($mem_id);
+        $mem=  User::find(Auth::id());
         if (!$mem){
         return response()->json(['error' => 'Member not found'], 404);
         } else{return Post::destroy($id);}

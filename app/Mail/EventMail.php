@@ -7,10 +7,13 @@ use Faker\Provider\ar_EG\Address;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Address as MailablesAddress;
+use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 use PharIo\Manifest\Email;
+use User;
 
 class EventMail extends Mailable
 {
@@ -18,13 +21,21 @@ class EventMail extends Mailable
 
     public $maildata;
     
+    // public $path;
+    public $address;
+    
+    
     /**
      * Create a new message instance.
      */
-    public function __construct($maildata)
+    // public function __construct($maildata, $address, $path)
+    public function __construct($maildata, $address)
     {
         $this->maildata=$maildata;
+        // $this->path=$path;
+        $this->address=$address;
         
+       
     }
 
     /**
@@ -33,16 +44,11 @@ class EventMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
+            
+            from: new MailablesAddress($this->address),
             subject: "Event Mail",
-            // from: new Member($this->from),
-            // replyTo: [
-            //     new Member($this->to),
-            // ],
-            // using: [
-            //     function (Email $message) {
-            //         return $this->message;
-            //     },
-            // ]
+            
+            
         );
     }
 
@@ -63,6 +69,8 @@ class EventMail extends Mailable
      */
     public function attachments(): array
     {
-        return [];
+        return [
+            // Attachment::fromPath($this->path)
+        ];
     }
 }

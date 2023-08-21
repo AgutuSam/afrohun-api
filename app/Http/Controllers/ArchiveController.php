@@ -39,25 +39,27 @@ class ArchiveController extends Controller
             'title'=> 'required',
             'description' => 'required',
             'file_path' => 'required',
-            
+
           ));
           // decode token to  get id
           // or get id from front end
 
         $arch= new Archive();
-        
+        $filename=$request->file('file_path')->store('archives','public');
+
         $arch->category = $request->category;
         $arch->title = $request->title;
         $arch->description = $request->description;
-        $arch->file_path = $request->file_path;
-        
+        // $arch->file_path = $request->file_path;
+          $arch->file_path = $filename;
+
         $arch->save();
 
         return $this->success([
         'data' => $arch,
-        'message'=>'donation created'
-        ]);  
-    
+        'message'=>'Archive Uploaded'
+        ]);
+
     }
 
     /**
